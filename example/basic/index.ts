@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import fs from "fs";
 import { Connection, Keypair, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { DEFAULT_DECIMALS, PumpFunSDK } from "../../src";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
@@ -69,7 +70,7 @@ const main = async () => {
       name: "TST-7",
       symbol: "TST-7",
       description: "TST-7: This is a test token",
-      filePath: "example/basic/random.png",
+      file: await fs.openAsBlob("example/basic/random.png"),
     };
 
     let createResults = await sdk.createAndBuy(
@@ -87,7 +88,7 @@ const main = async () => {
     if (createResults.success) {
       console.log("Success:", `https://pump.fun/${mint.publicKey.toBase58()}`);
       boundingCurveAccount = await sdk.getBondingCurveAccount(mint.publicKey);
-      console.log("boundingCurveAccount", boundingCurveAccount);
+      console.log("Bonding curve after create and buy", boundingCurveAccount);
       printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
     }
   } else {
@@ -111,6 +112,7 @@ const main = async () => {
 
     if (buyResults.success) {
       printSPLBalance(connection, mint.publicKey, testAccount.publicKey);
+      console.log("Bonding curve after buy", await sdk.getBondingCurveAccount(mint.publicKey));
     } else {
       console.log("Buy failed");
     }
@@ -141,6 +143,7 @@ const main = async () => {
         );
 
         printSPLBalance(connection, mint.publicKey, testAccount.publicKey, "After SPL sell all");
+        console.log("Bonding curve after sell", await sdk.getBondingCurveAccount(mint.publicKey));
       } else {
         console.log("Sell failed");
       }
